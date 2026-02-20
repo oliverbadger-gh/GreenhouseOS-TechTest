@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
-import { contacts } from "@/data/mock";
+import { contacts, offers } from "@/data/mock";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const propertyId = searchParams.get("propertyId");
 
   if (propertyId) {
-    const filtered = contacts.filter((c: any) => c.propertyId === propertyId);
+    const propertyOffers = offers.filter((o) => o.propertyId === propertyId);
+    const contactIds = new Set(propertyOffers.map((o) => o.contactId));
+    const filtered = contacts.filter((c) => contactIds.has(c.id));
     return NextResponse.json(filtered);
   }
 
