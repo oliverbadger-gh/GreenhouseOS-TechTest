@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import PropertyCard from "./components/PropertyCard";
+import { EnrichedProperty } from "@/data/mock";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 export default function HomePage() {
-  const [properties, setProperties] = useState<any>([]);
+  const [properties, setProperties] = useState<EnrichedProperty[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export default function HomePage() {
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {properties.map((property: any) => (
+        {properties.map((property: EnrichedProperty) => (
           <PropertyCard key={property.id} property={property} />
         ))}
       </div>
