@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Property, Offer } from "@/data/mock";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
-function PriceDisplay({ price }: { price: any }) {
+function PriceDisplay({ price }: { price: number }) {
   return (
     <p className="text-3xl font-bold text-green-700 mt-2">
       {price}
@@ -18,12 +19,12 @@ function PropertyHeader({
   status,
   listedDate,
 }: {
-  address: any;
-  price: any;
-  status: any;
-  listedDate: any;
+  address: string;
+  price: number;
+  status: string;
+  listedDate: string;
 }) {
-  const getStatusColor = (s: any) => {
+  const getStatusColor = (s: string) => {
     if (s === "Available") return "bg-green-100 text-green-800";
     if (s === "Sale Agreed") return "bg-yellow-100 text-yellow-800";
     if (s === "Sold") return "bg-blue-100 text-blue-800";
@@ -52,10 +53,10 @@ function OfferRow({
   amount,
   status,
 }: {
-  amount: any;
-  status: any;
+  amount: number;
+  status: string;
 }) {
-  const getStatusColor = (s: any) => {
+  const getStatusColor = (s: string) => {
     if (s === "Accepted") return "bg-green-100 text-green-800";
     if (s === "Rejected") return "bg-red-100 text-red-800";
     if (s === "Pending") return "bg-yellow-100 text-yellow-800";
@@ -77,10 +78,10 @@ function OfferRow({
 export default function PropertyDetailPage({
   params,
 }: {
-  params: any;
+  params: { id: string };
 }) {
-  const [property, setProperty] = useState<any>(null);
-  const [offers, setOffers] = useState<any>([]);
+  const [property, setProperty] = useState<Property | null>(null);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [loadingProperty, setLoadingProperty] = useState(true);
   const [loadingOffers, setLoadingOffers] = useState(true);
 
@@ -152,7 +153,7 @@ export default function PropertyDetailPage({
               </tr>
             </thead>
             <tbody>
-              {offers.map((offer: any) => (
+              {offers.map((offer: Offer) => (
                 <OfferRow
                   key={offer.id}
                   amount={offer.amount}
