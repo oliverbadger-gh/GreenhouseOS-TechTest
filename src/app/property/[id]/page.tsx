@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-const API_URL = "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 function PriceDisplay({ price }: { price: any }) {
   return (
@@ -86,23 +86,24 @@ export default function PropertyDetailPage({
 
   useEffect(() => {
     const fetchData = async () => {
-      const propertyRes = await fetch(
-        `${API_URL}/api/properties/${params.id}`
-      );
-      const propertyData = await propertyRes.json();
+      const [propertyRes, offersRes] = await Promise.all([
+        fetch(`${API_URL}/api/properties/${params.id}`),
+        fetch(`${API_URL}/api/offers?propertyId=${params.id}`),
+      ]);
+
+      const [propertyData, offersData] = await Promise.all([
+        propertyRes.json(),
+        offersRes.json(),
+      ]);
+
       setProperty(propertyData);
       setLoadingProperty(false);
-
-      const offersRes = await fetch(
-        `${API_URL}/api/offers?propertyId=${params.id}`
-      );
-      const offersData = await offersRes.json();
       setOffers(offersData);
       setLoadingOffers(false);
     };
 
     fetchData();
-  }, []);
+  }, [params.id]);
 
   if (loadingProperty) {
     return (
