@@ -1,8 +1,12 @@
+export type PropertyStatus = "Available" | "Sale Agreed" | "Sold";
+export type ContactRole = "Vendor" | "Buyer";
+export type OfferStatus = "Accepted" | "Rejected" | "Pending";
+
 export interface Property {
   id: string;
   address: string;
   price: number;
-  status: string;
+  status: PropertyStatus;
   listedDate: string;
   imageUrl: string;
 }
@@ -10,7 +14,7 @@ export interface Property {
 export interface Contact {
   id: string;
   name: string;
-  role: string;
+  role: ContactRole;
   email: string;
 }
 
@@ -19,10 +23,17 @@ export interface Offer {
   propertyId: string;
   contactId: string;
   amount: number;
-  status: string;
+  status: OfferStatus;
 }
 
-export const properties = [
+export interface EnrichedProperty extends Property {
+  _metadata: {
+    offerCount: number;
+    contactCount: number;
+  };
+}
+
+export const properties: Property[] = [
   {
     id: "prop-1",
     address: "12 Kensington Gardens, London W8 4PE",
@@ -113,7 +124,7 @@ export const properties = [
   },
 ];
 
-export const contacts = [
+export const contacts: Contact[] = [
   { id: "contact-1", name: "James Whitfield", role: "Vendor", email: "j.whitfield@email.com" },
   { id: "contact-2", name: "Sarah Chen", role: "Buyer", email: "sarah.chen@email.com" },
   { id: "contact-3", name: "Michael Torres", role: "Buyer", email: "m.torres@email.com" },
@@ -142,7 +153,7 @@ export const contacts = [
   { id: "contact-26", name: "Lisa Jennings", role: "Buyer", email: "l.jennings@email.com" },
 ];
 
-export const offers = [
+export const offers: Offer[] = [
   { id: "offer-1", propertyId: "prop-1", contactId: "contact-2", amount: 1200000, status: "Rejected" },
   { id: "offer-2", propertyId: "prop-1", contactId: "contact-2", amount: 1230000, status: "Pending" },
   { id: "offer-3", propertyId: "prop-1", contactId: "contact-3", amount: 1250000, status: "Pending" },
