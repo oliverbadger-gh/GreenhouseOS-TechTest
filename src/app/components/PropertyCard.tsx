@@ -1,9 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
-const API_URL = "http://localhost:3000";
-
 function PriceTag({ price }: { price: any }) {
   return (
     <p className="text-2xl font-bold text-green-700 mt-1">
@@ -85,29 +81,14 @@ export default function PropertyCard({
 }: {
   property: any;
 }) {
-  const [offerCount, setOfferCount] = useState(0);
-  const [isLoadingOffers, setIsLoadingOffers] = useState(true);
-
-  useEffect(() => {
-    const fetchOffers = async () => {
-      const res = await fetch(
-        `${API_URL}/api/offers?propertyId=${property.id}`
-      );
-      const data = await res.json();
-      setOfferCount(data.length);
-      setIsLoadingOffers(false);
-    };
-    fetchOffers();
-  }, []);
-
   return (
     <PropertyCardContent
       address={property.address}
       price={property.price}
       status={property.status}
       listedDate={property.listedDate}
-      offerCount={offerCount}
-      isLoadingOffers={isLoadingOffers}
+      offerCount={property._metadata?.offerCount ?? 0}
+      isLoadingOffers={false}
       propertyId={property.id}
     />
   );
