@@ -1,11 +1,12 @@
 "use client";
 
 import { EnrichedProperty } from "@/data/mock";
+import { formatGBP, daysOnMarket } from "@/utils/format";
 
 function PriceTag({ price }: { price: number }) {
   return (
     <p className="text-2xl font-bold text-green-700 mt-1">
-      {price}
+      {formatGBP(price)}
     </p>
   );
 }
@@ -24,6 +25,7 @@ function PropertyInfo({
       <h3 className="font-semibold text-lg text-gray-900 truncate">{address}</h3>
       <PriceTag price={price} />
       <p className="text-xs text-gray-400 mt-1">Listed: {listedDate}</p>
+      <p className="text-xs text-gray-500 mt-0.5">{daysOnMarket(listedDate)} days on market</p>
     </div>
   );
 }
