@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { Property, Offer } from "@/data/mock";
+import { formatGBP } from "@/utils/format";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 function PriceDisplay({ price }: { price: number }) {
   return (
     <p className="text-3xl font-bold text-green-700 mt-2">
-      {price}
+      {formatGBP(price)}
     </p>
   );
 }
@@ -65,7 +66,7 @@ function OfferRow({
 
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50">
-      <td className="py-3 px-4 font-medium text-gray-900">{amount}</td>
+      <td className="py-3 px-4 font-medium text-gray-900">{formatGBP(amount)}</td>
       <td className="py-3 px-4">
         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(status)}`}>
           {status}
@@ -84,6 +85,9 @@ export default function PropertyDetailPage({
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loadingProperty, setLoadingProperty] = useState(true);
   const [loadingOffers, setLoadingOffers] = useState(true);
+  const [offerAmount, setOfferAmount] = useState("");
+  const [offerError, setOfferError] = useState("");
+  const [offerSuccess, setOfferSuccess] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -106,6 +110,38 @@ export default function PropertyDetailPage({
     fetchData();
   }, [params.id]);
 
+  const highestOffer = offers.length > 0
+    ? Math.max(...offers.map((o) => o.amount))
+    : 0;
+  const isHotProperty = property !== null && highestOffer > property.price;
+
+  const handleSubmitOffer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setOfferError("");
+    setOfferSuccess("");
+
+    const parsed = Number(offerAmount);
+    if (!offerAmount || isNaN(parsed) || parsed <= 0) {
+      setOfferError("Please enter a valid positive amount.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/api/offers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId: params.id, amount: parsed }),
+      });
+      if (!res.ok) throw new Error("Failed to submit offer");
+      const newOffer: Offer = await res.json();
+      setOffers((prev) => [...prev, newOffer]);
+      setOfferAmount("");
+      setOfferSuccess(`Offer of ${formatGBP(parsed)} submitted successfully!`);
+    } catch {
+      setOfferError("Something went wrong. Please try again.");
+    }
+  };
+
   if (loadingProperty) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
@@ -127,8 +163,13 @@ export default function PropertyDetailPage({
       </a>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="bg-gray-200 h-72 flex items-center justify-center">
+        <div className="bg-gray-200 h-72 flex items-center justify-center relative">
           <span className="text-gray-400 text-6xl">🏠</span>
+          {isHotProperty && (
+            <span className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+              🔥 Hot Property
+            </span>
+          )}
         </div>
         <PropertyHeader
           address={property.address}
@@ -163,6 +204,32 @@ export default function PropertyDetailPage({
             </tbody>
           </table>
         )}
+      </div>
+
+      <div className="mt-8 bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Make an Offer</h2>
+        <form onSubmit={handleSubmitOffer} className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">£</span>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={offerAmount}
+              onChange={(e) => { setOfferAmount(e.target.value); setOfferError(""); setOfferSuccess(""); }}
+              placeholder="Enter amount"
+              className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+            />
+          </div>
+          <button
+            type="submit"
+            className="px-5 py-2 bg-green-700 text-white text-sm font-semibold rounded-md hover:bg-green-800 transition-colors"
+          >
+            Submit Offer
+          </button>
+        </form>
+        {offerError && <p className="text-red-600 text-sm mt-2">{offerError}</p>}
+        {offerSuccess && <p className="text-green-700 text-sm mt-2">{offerSuccess}</p>}
       </div>
     </div>
   );
